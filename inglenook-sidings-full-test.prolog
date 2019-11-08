@@ -158,15 +158,15 @@ last_n(N, L1, L2, L3) :-
   append(L3, L2, L1), length(L2, N).
 
 %% Generate all problem starting conditions and solve them.
-generate_all_problems :-
-	append('solutions-full-all.txt'), !,
-  permutation([1, 2, 3, 4, 5, 6, 7, 8], StartList),
-	first_n(5, StartList, StartTrk1, StartTrk2),
- 	StartState = [[e], StartTrk1, StartTrk2, []],
- 	EndState = [[e], [1, 2, 3, 4, 5], [6, 7, 8], []],
-  write('Start state: '), write(StartState), nl,
- 	solve(StartState, EndState),
- 	fail.
+%generate_all_problems :-
+%	append('solutions-full-all.txt'), !,
+%  permutation([1, 2, 3, 4, 5, 6, 7, 8], StartList),
+%	first_n(5, StartList, StartTrk1, StartTrk2),
+% 	StartState = [[e], StartTrk1, StartTrk2, []],
+% 	EndState = [[e], [1, 2, 3, 4, 5], [6, 7, 8], []],
+%  write('Start state: '), write(StartState), nl,
+% 	solve(StartState, EndState),
+% 	fail.
 
 generate_all_permutations :-
   append('all-permutations.txt'), !,
@@ -179,12 +179,16 @@ read_permutations(FileName) :-
   repeat,
     read(Term),
     (  Term == end_of_file
-    -> !
+    -> (  current_output(Stream),
+          close(Stream),
+          tell(user),
+          write('Done!'), nl, !)
     ;  process(Term),
        fail
     ).
 
 process(StartList) :-
+  append('solutions.txt'),
 	first_n(5, StartList, StartTrk1, StartTrk2),
  	StartState = [[e], StartTrk1, StartTrk2, []],
  	EndState = [[e], [1, 2, 3, 4, 5], [6, 7, 8], []],
