@@ -10,7 +10,12 @@
 %%%
 %%%
 %%%------------------------------------------------------------------------
+%%% These are for use in yap.  They can be commented out when using
+%%% swi prolog or gprolog
 :- use_module(library(lists)).
+append(File) :-
+  open(File, 'append', Stream),
+  set_output(Stream).
 %%%
 %%% Predicates to find solutions
 %%% ----------------------------
@@ -175,13 +180,16 @@ generate_all_permutations :-
   write(L), write('.'), nl,
   fail.
 
-read_permutations(FileName) :-
-  see(FileName),
+read_permutations(InFile, OutFile) :-
+  append(OutFile),
+  see(InFile),
   repeat,
     read(Term),
     (  Term == end_of_file
-    -> (  current_output(Stream),
-          close(Stream),
+    -> (  current_output(OutStream),
+          close(OutStream),
+          current_input(InStream),
+          close(InStream),
           tell(user),
           write('Done!'), nl, !)
     ;  process(Term),
@@ -189,7 +197,6 @@ read_permutations(FileName) :-
     ).
 
 process(StartList) :-
-  append('solutions.txt'),
 	first_n(5, StartList, StartTrk1, StartTrk2),
  	StartState = [[e], StartTrk1, StartTrk2, []],
  	EndState = [[e], [1, 2, 3, 4, 5], [6, 7, 8], []],
