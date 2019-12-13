@@ -1,12 +1,12 @@
 %%%------------------------------------------------------------------------
-%%% inglenook-sidings-full-test.prolog
+%%% inglenook-sidings-full-fwd-only.prolog
 %%%
 %%% Find solutions to a classic shunting (switching) puzzle using Prolog.
 %%% This set of predicates has been tested using SWI Prolog and gprolog on
 %%% Linux and using SWI Prolog on Windows 10.
 %%%
 %%% Andrew Palm
-%%% 2019-11-06
+%%% 2019-12-13
 %%%
 %%%
 %%%------------------------------------------------------------------------
@@ -97,17 +97,8 @@ solve(StartState, EndState) :-
   path(StartState, EndState, Path), !,
   write_solution(Path).
 solve(StartState, EndState) :-
-  % Find both forward and reverse solutions using an intermediate
-  % node and set Path as the shorter of the two (or the forward
-  % solution if solution lengths are equal)
   solve_fwd(StartState, EndState, FwdPath), !,
-  length(FwdPath, FwdM),
-  % Handle case where track(s) in EndState are originally indefinate
-  FwdPath = [DefEndState|_],
-  solve_rev(StartState, DefEndState, RevPath), !,
-  length(RevPath, RevM),
-  ( FwdM > RevM -> Path = RevPath; Path = FwdPath ),
-  write_solution(Path).
+  write_solution(FwdPath).
 
 %% solve_fwd(StartState, EndState, Path) succeeds if there is a path of
 %% moves from StartState to EndState by Path and which goes through an
@@ -124,11 +115,6 @@ solve_fwd(StartState, EndState, Path) :-
   path(IntState, EndState, Path2), !,      % Get path from intermediate goal state
   append(Path2, Path1Tail, Path). % to end state and join paths
 
-%% Find reverse solution from StartState to EndState
-solve_rev(StartState, EndState, Path) :-
-  solve_fwd(EndState, StartState, RevPath),
-  reverse(RevPath, Path), !.
-
 %% Find an optimally minimal length solution using depth-first iterative
 %% deepening.  Note that run times are unacceptably long for paths of
 %% length more than about 12 moves.
@@ -140,7 +126,7 @@ write_solution(Path) :-
   length(Path, N),
   Nsteps is N-1,
   %write(Nsteps), nl.   % This line is for writing number of moves only
-  write('    '), write('Moves: '), write(Nsteps), nl.
+  write(' : '), write(Nsteps), nl.
   %write('Solution: (read from top down)'),
   %reverse(Path, RevPath),
   %nl, write_states(RevPath).
@@ -200,5 +186,5 @@ process(StartList) :-
 	first_n(5, StartList, StartTrk1, StartTrk2),
  	StartState = [[e], StartTrk1, StartTrk2, []],
  	EndState = [[e], [1, 2, 3, 4, 5], [6, 7, 8], []],
-  write('Start state: '), write(StartState),
+  write(StartState),
  	solve(StartState, EndState).
